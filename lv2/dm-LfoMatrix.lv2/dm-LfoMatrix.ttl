@@ -8,10 +8,10 @@
 @prefix mod:   <http://moddevices.com/ns/mod#> .
 
 <https://github.com/davemollen/dm-LfoMatrix>
-	a lv2:Plugin , lv2:UtilityPlugin ;
+	a lv2:Plugin , mod:ControlVoltagePlugin;
 	lv2:project <http://lv2plug.in/ns/lv2> ;
 	doap:name "dm-LfoMatrix" ;
-	doap:license <http://opensource.org/licenses/isc> ;
+	doap:license "GPLv3" ;
 	doap:maintainer [
 		foaf:name "Dave Mollen" ;
 		foaf:homepage <https://github.com/davemollen/dm-LfoMatrix> ;
@@ -162,12 +162,12 @@ A Control Voltage LFO plugin effect written in Rust.
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	], [
-		a lv2:CVPort, lv2:OutputPort ;
+		a lv2:CVPort, lv2:OutputPort, mod:CVPort ;
 		lv2:index 14 ;
 		lv2:symbol "out1" ;
 		lv2:name "Out1"
 	] , [
-		a lv2:CVPort, lv2:OutputPort ;
+		a lv2:CVPort, lv2:OutputPort, mod:CVPort ;
 		lv2:index 15 ;
 		lv2:symbol "out2" ;
 		lv2:name "Out2"
