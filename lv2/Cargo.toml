@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 lv2 = "0.6.0"
 lfo_matrix = { path = "../lfo_matrix" }
+
+[lib]
+crate-type = ["cdylib"]

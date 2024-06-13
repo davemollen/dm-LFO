@@ -7,6 +7,7 @@ use {
   std::f32::consts::{PI, TAU},
 };
 
+#[derive(Clone, Copy)]
 pub enum LfoShape {
   Sine,
   Triangle,

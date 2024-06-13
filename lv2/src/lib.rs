@@ -40,6 +40,7 @@ impl DmLfoMatrix {
       6. => LfoShape::SampleAndHold,
       7. => LfoShape::Random,
       8. => LfoShape::CurvedRandom,
+      _ => panic!("No valid LFO shape has been selected."),
     }
   }
 
@@ -131,7 +132,7 @@ impl Plugin for DmLfoMatrix {
       self.is_active = true;
     }
 
-    for (outputs) in ports.out1.iter_mut().zip(ports.out2.iter_mut()) {
+    for outputs in ports.out1.iter_mut().zip(ports.out2.iter_mut()) {
       let lfos = self.lfo_matrix.process(
         lfo1_on,
         lfo1_freq,
