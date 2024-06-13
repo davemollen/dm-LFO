@@ -17,6 +17,7 @@ pub enum LfoShape {
   SampleAndHold,
   Random,
   CurvedRandom,
+  Noise,
 }
 
 pub struct Lfo {
@@ -80,7 +81,7 @@ impl Lfo {
         }
         self.cosine_interp(phase)
       }
-      _ => panic!("Waveform type could not be found."),
+      LfoShape::Noise => fastrand::f32() * 2. - 1.,
     }
   }
 

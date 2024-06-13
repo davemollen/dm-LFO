@@ -60,6 +60,7 @@ A Control Voltage LFO plugin effect written in Rust.
 		lv2:scalePoint [rdfs:label "sample and hold"; rdf:value 6];
 		lv2:scalePoint [rdfs:label "random"; rdf:value 7];
 		lv2:scalePoint [rdfs:label "curved random"; rdf:value 8];
+		lv2:scalePoint [rdfs:label "noise"; rdf:value 9];
 	], [
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 3 ;

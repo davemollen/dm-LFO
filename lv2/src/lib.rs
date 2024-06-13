@@ -40,6 +40,7 @@ impl DmLfoMatrix {
       6. => LfoShape::SampleAndHold,
       7. => LfoShape::Random,
       8. => LfoShape::CurvedRandom,
+      9. => LfoShape::Noise,
       _ => panic!("No valid LFO shape has been selected."),
     }
   }
