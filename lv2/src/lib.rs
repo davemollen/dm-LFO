@@ -26,7 +26,7 @@ impl DmLFO {
       2. => LfoShape::Triangle,
       3. => LfoShape::SawUp,
       4. => LfoShape::SawDown,
-      5. => LfoShape::Square,
+      5. => LfoShape::Rectangle,
       6. => LfoShape::SampleAndHold,
       7. => LfoShape::Random,
       8. => LfoShape::CurvedRandom,

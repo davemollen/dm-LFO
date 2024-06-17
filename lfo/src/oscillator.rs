@@ -13,7 +13,7 @@ pub enum LfoShape {
   Triangle,
   SawUp,
   SawDown,
-  Square,
+  Rectangle,
   SampleAndHold,
   Random,
   CurvedRandom,
@@ -51,7 +51,7 @@ impl Oscillator {
       }
       LfoShape::SawDown => phase * 2. - 1.,
       LfoShape::SawUp => phase * -2. + 1.,
-      LfoShape::Square => {
+      LfoShape::Rectangle => {
         if phase > 0.5 {
           1.
         } else {
