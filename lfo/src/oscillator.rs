@@ -20,14 +20,14 @@ pub enum LfoShape {
   Noise,
 }
 
-pub struct Lfo {
+pub struct Oscillator {
   phasor: Phasor,
   delta: Delta,
   origin: f32,
   target: f32,
 }
 
-impl Lfo {
+impl Oscillator {
   pub fn new(sample_rate: f32) -> Self {
     Self {
       phasor: Phasor::new(sample_rate),

@@ -1,35 +1,25 @@
-extern crate lfo_matrix;
+extern crate lfo;
 extern crate lv2;
-use lfo_matrix::{LfoMatrix, LfoShape};
+use lfo::{InputMode, Lfo, LfoShape};
 use lv2::prelude::*;
 
 #[derive(PortCollection)]
 struct Ports {
-  lfo1_on: InputPort<Control>,
-  lfo1_freq: InputPort<Control>,
-  lfo1_shape: InputPort<Control>,
-  lfo1_to_lfo1: InputPort<Control>,
-  lfo1_to_lfo2: InputPort<Control>,
-  lfo1_to_out1: InputPort<Control>,
-  lfo1_to_out2: InputPort<Control>,
-  lfo2_on: InputPort<Control>,
-  lfo2_freq: InputPort<Control>,
-  lfo2_shape: InputPort<Control>,
-  lfo2_to_lfo1: InputPort<Control>,
-  lfo2_to_lfo2: InputPort<Control>,
-  lfo2_to_out1: InputPort<Control>,
-  lfo2_to_out2: InputPort<Control>,
-  out1: OutputPort<CV>,
-  out2: OutputPort<CV>,
+  input: InputPort<CV>,
+  input_mode: InputPort<Control>,
+  freq: InputPort<Control>,
+  depth: InputPort<Control>,
+  shape: InputPort<Control>,
+  output: OutputPort<CV>,
 }
 
-#[uri("https://github.com/davemollen/dm-LfoMatrix")]
-struct DmLfoMatrix {
-  lfo_matrix: LfoMatrix,
+#[uri("https://github.com/davemollen/dm-LFO")]
+struct DmLFO {
+  lfo: Lfo,
   is_active: bool,
 }
 
-impl DmLfoMatrix {
+impl DmLFO {
   fn map_shape(shape: f32) -> LfoShape {
     match shape {
       1. => LfoShape::Sine,
@@ -41,49 +31,33 @@ impl DmLfoMatrix {
       7. => LfoShape::Random,
       8. => LfoShape::CurvedRandom,
       9. => LfoShape::Noise,
-      _ => panic!("No valid LFO shape has been selected."),
+      _ => panic!("Shape is invalid."),
     }
   }
 
-  fn get_parameters(
-    &self,
-    ports: &mut Ports,
-  ) -> (
-    bool,
-    f32,
-    LfoShape,
-    f32,
-    f32,
-    f32,
-    f32,
-    bool,
-    f32,
-    LfoShape,
-    f32,
-    f32,
-    f32,
-    f32,
-  ) {
+  fn map_input_mode(input_mode: f32) -> InputMode {
+    match input_mode {
+      1. => InputMode::Add,
+      2. => InputMode::SubtractA,
+      3. => InputMode::SubtractB,
+      4. => InputMode::Multiply,
+      5. => InputMode::FM,
+      6. => InputMode::PM,
+      _ => panic!("Input mode is invalid."),
+    }
+  }
+
+  fn get_parameters(&self, ports: &mut Ports) -> (InputMode, f32, f32, LfoShape) {
     (
-      *ports.lfo1_on == 1.,
-      *ports.lfo1_freq,
-      Self::map_shape(*ports.lfo1_shape),
-      *ports.lfo1_to_lfo1 * *ports.lfo1_to_lfo1 * *ports.lfo1_to_lfo1,
-      *ports.lfo1_to_lfo2 * *ports.lfo1_to_lfo2 * *ports.lfo1_to_lfo2,
-      *ports.lfo1_to_out1 * *ports.lfo1_to_out1 * *ports.lfo1_to_out1,
-      *ports.lfo1_to_out2 * *ports.lfo1_to_out2 * *ports.lfo1_to_out2,
-      *ports.lfo2_on == 1.,
-      *ports.lfo2_freq,
-      Self::map_shape(*ports.lfo2_shape),
-      *ports.lfo2_to_lfo1 * *ports.lfo2_to_lfo1 * *ports.lfo2_to_lfo1,
-      *ports.lfo2_to_lfo2 * *ports.lfo2_to_lfo2 * *ports.lfo2_to_lfo2,
-      *ports.lfo2_to_out1 * *ports.lfo2_to_out1 * *ports.lfo2_to_out1,
-      *ports.lfo2_to_out2 * *ports.lfo2_to_out2 * *ports.lfo2_to_out2,
+      Self::map_input_mode(*ports.input_mode),
+      *ports.freq,
+      *ports.depth * 0.1,
+      Self::map_shape(*ports.shape),
     )
   }
 }
 
-impl Plugin for DmLfoMatrix {
+impl Plugin for DmLFO {
   // Tell the framework which ports this plugin has.
   type Ports = Ports;
 
@@ -94,7 +68,7 @@ impl Plugin for DmLfoMatrix {
   // Create a new instance of the plugin; Trivial in this case.
   fn new(_plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
     Some(Self {
-      lfo_matrix: LfoMatrix::new(_plugin_info.sample_rate() as f32),
+      lfo: Lfo::new(_plugin_info.sample_rate() as f32),
       is_active: false,
     })
   }
@@ -102,59 +76,20 @@ impl Plugin for DmLfoMatrix {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let (
-      lfo1_on,
-      lfo1_freq,
-      lfo1_shape,
-      lfo1_to_lfo1,
-      lfo1_to_lfo2,
-      lfo1_to_out1,
-      lfo1_to_out2,
-      lfo2_on,
-      lfo2_freq,
-      lfo2_shape,
-      lfo2_to_lfo1,
-      lfo2_to_lfo2,
-      lfo2_to_out1,
-      lfo2_to_out2,
-    ) = self.get_parameters(ports);
+    let (input_mode, freq, depth, shape) = self.get_parameters(ports);
 
     if !self.is_active {
-      self.lfo_matrix.initialize_params(
-        lfo1_to_lfo1,
-        lfo1_to_lfo2,
-        lfo1_to_out1,
-        lfo1_to_out2,
-        lfo2_to_lfo1,
-        lfo2_to_lfo2,
-        lfo2_to_out1,
-        lfo2_to_out2,
-      );
+      self.lfo.initialize_params(freq, depth);
       self.is_active = true;
     }
 
-    for outputs in ports.out1.iter_mut().zip(ports.out2.iter_mut()) {
-      let lfos = self.lfo_matrix.process(
-        lfo1_on,
-        lfo1_freq,
-        lfo1_shape,
-        lfo1_to_lfo1,
-        lfo1_to_lfo2,
-        lfo1_to_out1,
-        lfo1_to_out2,
-        lfo2_on,
-        lfo2_freq,
-        lfo2_shape,
-        lfo2_to_lfo1,
-        lfo2_to_lfo2,
-        lfo2_to_out1,
-        lfo2_to_out2,
-      );
-      *outputs.0 = lfos.0;
-      *outputs.1 = lfos.1;
+    for (input, output) in ports.input.iter_mut().zip(ports.output.iter_mut()) {
+      *output = self
+        .lfo
+        .process(*input * 0.1, input_mode, freq, depth, shape);
     }
   }
 }
 
 // Generate the plugin descriptor function which exports the plugin to the outside world.
-lv2_descriptors!(DmLfoMatrix);
+lv2_descriptors!(DmLFO);

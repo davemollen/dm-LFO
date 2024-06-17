@@ -1,11 +1,11 @@
 [package]
-name = "dm_lfo_matrix"
+name = "dm_lfo"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 lv2 = "0.6.0"
-lfo_matrix = { path = "../lfo_matrix" }
+lfo = { path = "../lfo" }
 
 [lib]
 crate-type = ["cdylib"]
