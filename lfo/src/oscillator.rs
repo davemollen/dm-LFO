@@ -55,12 +55,12 @@ impl Oscillator {
       LfoShape::Sine => (phase * TAU).fast_sin(),
       LfoShape::Triangle => {
         if phase > 0.5 {
-          phase * 2.
-        } else {
           (phase - 0.5) * -2. + 1.
+        } else {
+          phase * 2.
         }
       }
-      LfoShape::SawDown => phase * -1.,
+      LfoShape::SawDown => 1. - phase,
       LfoShape::SawUp => phase,
       LfoShape::Rectangle => {
         if phase > 0.5 {
