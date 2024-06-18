@@ -60,8 +60,8 @@ impl Oscillator {
           (phase - 0.5) * -2. + 1.
         }
       }
-      LfoShape::SawDown => phase,
-      LfoShape::SawUp => phase * -1.,
+      LfoShape::SawDown => phase * -1.,
+      LfoShape::SawUp => phase,
       LfoShape::Rectangle => {
         if phase > 0.5 {
           1.
