@@ -23,6 +23,7 @@ pub enum LfoShape {
 pub struct Oscillator {
   phasor: Phasor,
   delta: Delta,
+  is_enabled: bool,
   origin: f32,
   target: f32,
 }
@@ -32,66 +33,63 @@ impl Oscillator {
     Self {
       phasor: Phasor::new(sample_rate),
       delta: Delta::new(),
+      is_enabled: true,
       origin: 0.,
       target: 0.,
     }
   }
 
-  pub fn process(&mut self, freq: f32, shape: LfoShape, phase_offset: f32) -> f32 {
-    let phase = Self::calculate_phase(self.phasor.process(freq), phase_offset);
+  pub fn initialize(&mut self, chance: f32) {
+    self.is_enabled = fastrand::f32() <= chance;
+  }
+
+  pub fn process(&mut self, freq: f32, shape: LfoShape, chance: f32) -> f32 {
+    let phase = self.phasor.process(freq);
+    let trigger = self.delta.process(phase) < 0.;
+    if trigger {
+      self.is_enabled = fastrand::f32() <= chance;
+    }
+    let phase = if self.is_enabled { phase } else { 0. };
 
     match shape {
       LfoShape::Sine => (phase * TAU).fast_sin(),
       LfoShape::Triangle => {
         if phase > 0.5 {
-          phase * 4. - 1.
+          phase * 2.
         } else {
-          (phase - 0.5) * -4. + 1.
+          (phase - 0.5) * -2. + 1.
         }
       }
-      LfoShape::SawDown => phase * 2. - 1.,
-      LfoShape::SawUp => phase * -2. + 1.,
+      LfoShape::SawDown => phase,
+      LfoShape::SawUp => phase * -1.,
       LfoShape::Rectangle => {
         if phase > 0.5 {
           1.
         } else {
-          -1.
+          0.
         }
       }
       LfoShape::SampleAndHold => {
-        let trigger = self.delta.process(phase) < 0.;
         if trigger {
-          self.target = fastrand::f32() * 2. - 1.;
+          self.target = fastrand::f32();
         }
         self.target
       }
       LfoShape::Random => {
-        let trigger = self.delta.process(phase) < 0.;
         if trigger {
           self.origin = self.target;
-          self.target = fastrand::f32() * 2. - 1.;
+          self.target = fastrand::f32();
         }
         self.linear_interp(phase)
       }
       LfoShape::CurvedRandom => {
-        let trigger = self.delta.process(phase) < 0.;
         if trigger {
           self.origin = self.target;
-          self.target = fastrand::f32() * 2. - 1.;
+          self.target = fastrand::f32();
         }
         self.cosine_interp(phase)
       }
-      LfoShape::Noise => fastrand::f32() * 2. - 1.,
-    }
-  }
-
-  fn calculate_phase(phase: f32, offset: f32) -> f32 {
-    let phase_offset = offset * 0.5 + 0.5;
-    let new_phase = phase + phase_offset;
-    if new_phase >= 1. {
-      new_phase - 1.
-    } else {
-      new_phase
+      LfoShape::Noise => fastrand::f32(),
     }
   }
 

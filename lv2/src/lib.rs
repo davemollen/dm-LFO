@@ -1,15 +1,16 @@
 extern crate lfo;
 extern crate lv2;
-use lfo::{InputMode, Lfo, LfoShape};
+use lfo::{Lfo, LfoShape};
 use lv2::prelude::*;
 
 #[derive(PortCollection)]
 struct Ports {
-  input: InputPort<CV>,
-  input_mode: InputPort<Control>,
   freq: InputPort<Control>,
   depth: InputPort<Control>,
   shape: InputPort<Control>,
+  offset: InputPort<Control>,
+  curve: InputPort<Control>,
+  chance: InputPort<Control>,
   output: OutputPort<CV>,
 }
 
@@ -35,24 +36,14 @@ impl DmLFO {
     }
   }
 
-  fn map_input_mode(input_mode: f32) -> InputMode {
-    match input_mode {
-      1. => InputMode::Add,
-      2. => InputMode::SubtractA,
-      3. => InputMode::SubtractB,
-      4. => InputMode::Multiply,
-      5. => InputMode::FM,
-      6. => InputMode::PM,
-      _ => panic!("Input mode is invalid."),
-    }
-  }
-
-  fn get_parameters(&self, ports: &mut Ports) -> (InputMode, f32, f32, LfoShape) {
+  fn get_parameters(&self, ports: &mut Ports) -> (f32, f32, LfoShape, f32, f32, f32) {
     (
-      Self::map_input_mode(*ports.input_mode),
       *ports.freq,
-      *ports.depth * 0.1,
+      *ports.depth * 0.001,
       Self::map_shape(*ports.shape),
+      *ports.offset * 0.01,
+      *ports.chance * 0.01,
+      2_f32.powf(*ports.curve * 0.02),
     )
   }
 }
@@ -76,17 +67,15 @@ impl Plugin for DmLFO {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let (input_mode, freq, depth, shape) = self.get_parameters(ports);
+    let (freq, depth, shape, offset, curve, chance) = self.get_parameters(ports);
 
     if !self.is_active {
-      self.lfo.initialize_params(freq, depth);
+      self.lfo.initialize_params(freq, depth, curve, chance);
       self.is_active = true;
     }
 
-    for (input, output) in ports.input.iter_mut().zip(ports.output.iter_mut()) {
-      *output = self
-        .lfo
-        .process(*input * 0.1, input_mode, freq, depth, shape);
+    for output in ports.output.iter_mut() {
+      *output = self.lfo.process(freq, depth, shape, offset, curve, chance);
     }
   }
 }
