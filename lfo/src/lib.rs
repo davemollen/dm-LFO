@@ -3,10 +3,8 @@ mod ramp_smooth;
 mod shared {
   pub mod float_ext;
 }
-use {
-  oscillator::{LfoShape, Oscillator},
-  ramp_smooth::RampSmooth,
-};
+pub use oscillator::LfoShape;
+use {oscillator::Oscillator, ramp_smooth::RampSmooth};
 
 pub struct Lfo {
   smooth_freq: RampSmooth,
