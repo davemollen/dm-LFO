@@ -1,4 +1,3 @@
-#![feature(portable_simd)]
 mod oscillator;
 mod ramp_smooth;
 mod shared {
