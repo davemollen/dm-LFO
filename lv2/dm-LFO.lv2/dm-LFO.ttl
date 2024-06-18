@@ -89,6 +89,8 @@ A Control Voltage LFO plugin effect written in Rust.
 	] , [
 		a lv2:CVPort, lv2:OutputPort, mod:CVPort ;
 		lv2:index 6 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 10.0  ;
 		lv2:symbol "output" ;
 		lv2:name "Output"
 	] .

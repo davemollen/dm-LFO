@@ -39,7 +39,7 @@ impl DmLFO {
   fn get_parameters(&self, ports: &mut Ports) -> (f32, f32, LfoShape, f32, f32, f32) {
     (
       *ports.freq,
-      *ports.depth * 0.001,
+      *ports.depth * 0.01,
       Self::map_shape(*ports.shape),
       *ports.offset * 0.01,
       *ports.chance * 0.01,
