@@ -51,7 +51,7 @@ impl Oscillator {
     }
     let phase = if self.is_enabled { phase } else { 0. };
 
-    match shape {
+    let wave = match shape {
       LfoShape::Sine => (phase * TAU).fast_sin(),
       LfoShape::Triangle => {
         if phase > 0.5 {
@@ -90,7 +90,9 @@ impl Oscillator {
         self.cosine_interp(phase)
       }
       LfoShape::Noise => fastrand::f32(),
-    }
+    };
+
+    wave * 2. - 1.
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {

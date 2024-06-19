@@ -37,12 +37,12 @@ impl Lfo {
   ) -> f32 {
     let freq = self.smooth_freq.process(freq);
     let depth = self.smooth_depth.process(depth);
-    let lfo = (self.oscillator.process(freq, shape, chance) * depth + offset).clamp(0., 1.);
+    let lfo = (self.oscillator.process(freq, shape, chance) * depth + offset).clamp(-1., 1.);
 
     Self::amplitude_to_cv(lfo)
   }
 
   fn amplitude_to_cv(amplitude: f32) -> f32 {
-    amplitude * 10.
+    amplitude * 5.
   }
 }
