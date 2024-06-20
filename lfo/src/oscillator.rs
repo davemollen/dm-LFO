@@ -34,8 +34,8 @@ impl Oscillator {
       phasor: Phasor::new(sample_rate),
       delta: Delta::new(),
       is_enabled: true,
-      origin: 0.,
-      target: 0.,
+      origin: 0.5,
+      target: 0.5,
     }
   }
 
@@ -49,20 +49,43 @@ impl Oscillator {
     if trigger {
       self.is_enabled = fastrand::f32() <= chance;
     }
-    let phase = if self.is_enabled { phase } else { 0. };
 
-    let wave = match shape {
-      LfoShape::Sine => (phase * TAU).fast_sin() * 0.5 + 0.5,
+    match shape {
+      LfoShape::Sine => {
+        let phase = if self.is_enabled { phase } else { 0.5 };
+        (phase * TAU).fast_sin() * 0.5 + 0.5
+      }
       LfoShape::Triangle => {
+        let phase = if self.is_enabled {
+          Self::wrap(phase + 0.25)
+        } else {
+          0.25
+        };
+
         if phase > 0.5 {
           (phase - 0.5) * -2. + 1.
         } else {
           phase * 2.
         }
       }
-      LfoShape::SawDown => 1. - phase,
-      LfoShape::SawUp => phase,
+      LfoShape::SawUp => {
+        let phase = if self.is_enabled {
+          Self::wrap(phase + 0.5)
+        } else {
+          0.5
+        };
+        phase
+      }
+      LfoShape::SawDown => {
+        if self.is_enabled {
+          Self::wrap(1.5 - phase)
+        } else {
+          0.
+        }
+      }
       LfoShape::Rectangle => {
+        let phase = if self.is_enabled { phase } else { 0.5 };
+
         if phase > 0.5 {
           1.
         } else {
@@ -71,28 +94,44 @@ impl Oscillator {
       }
       LfoShape::SampleAndHold => {
         if trigger {
-          self.target = fastrand::f32();
+          self.target = if self.is_enabled {
+            fastrand::f32()
+          } else {
+            0.5
+          };
         }
         self.target
       }
       LfoShape::Random => {
         if trigger {
           self.origin = self.target;
-          self.target = fastrand::f32();
+          self.target = if self.is_enabled {
+            fastrand::f32()
+          } else {
+            0.5
+          };
         }
         self.linear_interp(phase)
       }
       LfoShape::CurvedRandom => {
         if trigger {
           self.origin = self.target;
-          self.target = fastrand::f32();
+          self.target = if self.is_enabled {
+            fastrand::f32()
+          } else {
+            0.5
+          };
         }
         self.cosine_interp(phase)
       }
-      LfoShape::Noise => fastrand::f32(),
-    };
-
-    wave * 2. - 1.
+      LfoShape::Noise => {
+        if fastrand::f32() <= chance {
+          fastrand::f32()
+        } else {
+          0.5
+        }
+      }
+    }
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {
@@ -102,5 +141,13 @@ impl Oscillator {
   fn cosine_interp(&self, mix: f32) -> f32 {
     let cosine_mix = (1. - (mix * PI).fast_cos()) * 0.5;
     self.origin * (1. - cosine_mix) + self.target * cosine_mix
+  }
+
+  fn wrap(x: f32) -> f32 {
+    if x >= 1. {
+      x - 1.
+    } else {
+      x
+    }
   }
 }
