@@ -52,7 +52,7 @@ impl Oscillator {
     let phase = if self.is_enabled { phase } else { 0. };
 
     let wave = match shape {
-      LfoShape::Sine => (phase * TAU).fast_sin(),
+      LfoShape::Sine => (phase * TAU).fast_sin() * 0.5 + 0.5,
       LfoShape::Triangle => {
         if phase > 0.5 {
           (phase - 0.5) * -2. + 1.
