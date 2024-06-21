@@ -3,8 +3,27 @@ mod ramp_smooth;
 mod shared {
   pub mod float_ext;
 }
-pub use oscillator::LfoShape;
 use {oscillator::Oscillator, ramp_smooth::RampSmooth};
+
+#[derive(Clone, Copy)]
+pub enum LfoShape {
+  Sine,
+  Triangle,
+  SawUp,
+  SawDown,
+  Rectangle,
+  SampleAndHold,
+  Random,
+  CurvedRandom,
+  Noise,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum LfoOutputMode {
+  Bipolar,
+  UnipolarPositive,
+  UnipolarNegative,
+}
 
 pub struct Lfo {
   smooth_freq: RampSmooth,
@@ -34,15 +53,13 @@ impl Lfo {
     shape: LfoShape,
     offset: f32,
     chance: f32,
+    mode: LfoOutputMode,
   ) -> f32 {
     let freq = self.smooth_freq.process(freq);
     let depth = self.smooth_depth.process(depth);
-    let lfo = (self.oscillator.process(freq, shape, chance) * depth + offset).clamp(-1., 1.);
 
-    Self::amplitude_to_cv(lfo)
-  }
-
-  fn amplitude_to_cv(amplitude: f32) -> f32 {
-    amplitude * 5.
+    self
+      .oscillator
+      .process(freq, shape, chance, depth, offset, mode)
   }
 }
