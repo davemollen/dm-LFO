@@ -45,7 +45,7 @@ impl Oscillator {
       self.is_enabled = fastrand::f32() <= chance;
     }
 
-    let lfo = (match shape {
+    (match shape {
       LfoShape::Sine => {
         let phase_offset = match mode {
           LfoOutputMode::Bipolar => 0.,
@@ -174,13 +174,8 @@ impl Oscillator {
     } * depth
       + offset)
       .clamp(0., 1.)
-      * 10.;
-
-    match mode {
-      LfoOutputMode::Bipolar => lfo - 5.,
-      LfoOutputMode::UnipolarPositive => lfo,
-      LfoOutputMode::UnipolarNegative => lfo,
-    }
+      * 20.
+      - 10.
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {
