@@ -28,7 +28,7 @@ A Control Voltage LFO plugin effect written in Rust.
 		lv2:index 0 ;
 		lv2:symbol "freq" ;
 		lv2:name "Freq" ;
-		lv2:portProperty pprops:logarithmic ;
+		lv2:portProperty pprops:logarithmic , mod:tempoRelatedDynamicScalePoints ;
 		lv2:default 2.0 ;
 		lv2:minimum 0.1 ;
 		lv2:maximum 30.0 ;
