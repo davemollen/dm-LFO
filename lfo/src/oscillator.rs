@@ -1,7 +1,7 @@
 mod delta;
 mod phasor;
 use {
-  crate::{shared::float_ext::FloatExt, LfoOutputMode, LfoShape},
+  crate::{shared::float_ext::FloatExt, LfoShape},
   delta::Delta,
   phasor::Phasor,
   std::f32::consts::{PI, TAU},
@@ -37,7 +37,6 @@ impl Oscillator {
     chance: f32,
     depth: f32,
     offset: f32,
-    mode: LfoOutputMode,
   ) -> f32 {
     let phase = self.phasor.process(freq);
     let trigger = self.delta.process(phase) < 0.;
@@ -47,135 +46,92 @@ impl Oscillator {
 
     (match shape {
       LfoShape::Sine => {
-        let phase_offset = match mode {
-          LfoOutputMode::Bipolar => 0.,
-          _ => 0.75,
-        };
-        let phase = if self.is_enabled { phase } else { 0.5 };
-        ((phase + phase_offset) * TAU).fast_sin() * 0.5 + 0.5
+        if !self.is_enabled {
+          return 0.;
+        }
+
+        (phase * TAU).fast_sin()
       }
       LfoShape::Triangle => {
-        let phase_offset = match mode {
-          LfoOutputMode::Bipolar => 0.25,
-          _ => 0.,
-        };
-        let phase = if self.is_enabled {
-          Self::wrap(phase + phase_offset)
-        } else {
-          phase_offset
-        };
+        if !self.is_enabled {
+          return 0.;
+        }
 
+        let phase = Self::wrap(phase + 0.25);
         if phase > 0.5 {
-          (phase - 0.5) * -2. + 1.
+          (phase - 0.5) * -4. + 1.
         } else {
-          phase * 2.
+          phase * 4. - 1.
         }
       }
       LfoShape::SawUp => {
-        let (phase, phase_offset) = match mode {
-          LfoOutputMode::Bipolar => (phase, 0.5),
-          LfoOutputMode::UnipolarPositive => (phase, 0.),
-          LfoOutputMode::UnipolarNegative => (1. - phase, 0.),
-        };
-        let phase = if self.is_enabled {
-          Self::wrap(phase + phase_offset)
-        } else {
-          phase_offset
-        };
-        phase
+        if !self.is_enabled {
+          return 0.;
+        }
+
+        Self::wrap(phase + 0.5) * 2. - 1.
       }
       LfoShape::SawDown => {
-        let (phase, phase_offset) = match mode {
-          LfoOutputMode::Bipolar => (1. - phase + 0.5, 0.5),
-          LfoOutputMode::UnipolarPositive => (1. - phase, 0.),
-          LfoOutputMode::UnipolarNegative => (phase, 0.),
-        };
-
-        if self.is_enabled {
-          Self::wrap(phase + phase_offset)
-        } else {
-          phase_offset
+        if !self.is_enabled {
+          return 0.;
         }
+
+        Self::wrap(1.5 - phase) * 2. - 1.
       }
       LfoShape::Rectangle => {
-        let default_phase = match mode {
-          LfoOutputMode::Bipolar => 0.5,
-          _ => 0.,
-        };
-
         if !self.is_enabled {
-          return default_phase;
+          return 0.;
         }
+
         if phase > 0.5 {
           1.
         } else {
-          0.
+          -1.
         }
       }
       LfoShape::SampleAndHold => {
-        let default_phase = match mode {
-          LfoOutputMode::Bipolar => 0.5,
-          _ => 0.,
-        };
-
         if trigger {
           self.target = if self.is_enabled {
-            fastrand::f32()
+            fastrand::f32() * 2. - 1.
           } else {
-            default_phase
+            0.
           };
         }
         self.target
       }
       LfoShape::Random => {
-        let default_phase = match mode {
-          LfoOutputMode::Bipolar => 0.5,
-          _ => 0.,
-        };
-
         if trigger {
           self.origin = self.target;
           self.target = if self.is_enabled {
-            fastrand::f32()
+            fastrand::f32() * 2. - 1.
           } else {
-            default_phase
+            0.
           };
         }
         self.linear_interp(phase)
       }
       LfoShape::CurvedRandom => {
-        let default_phase = match mode {
-          LfoOutputMode::Bipolar => 0.5,
-          _ => 0.,
-        };
-
         if trigger {
           self.origin = self.target;
           self.target = if self.is_enabled {
-            fastrand::f32()
+            fastrand::f32() * 2. - 1.
           } else {
-            default_phase
+            0.
           };
         }
         self.cosine_interp(phase)
       }
       LfoShape::Noise => {
-        let default_phase = match mode {
-          LfoOutputMode::Bipolar => 0.5,
-          _ => 0.,
-        };
-
         if fastrand::f32() <= chance {
-          fastrand::f32()
+          fastrand::f32() * 2. - 1.
         } else {
-          default_phase
+          0.
         }
       }
     } * depth
       + offset)
-      .clamp(0., 1.)
+      .clamp(-1., 1.)
       * 20.
-      - 10.
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {

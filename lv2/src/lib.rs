@@ -1,6 +1,6 @@
 extern crate lfo;
 extern crate lv2;
-use lfo::{Lfo, LfoOutputMode, LfoShape};
+use lfo::{Lfo, LfoShape};
 use lv2::prelude::*;
 
 #[derive(PortCollection)]
@@ -10,7 +10,6 @@ struct Ports {
   shape: InputPort<Control>,
   offset: InputPort<Control>,
   chance: InputPort<Control>,
-  mode: InputPort<Control>,
   output: OutputPort<CV>,
 }
 
@@ -36,23 +35,13 @@ impl DmLFO {
     }
   }
 
-  fn map_mode(mode: f32) -> LfoOutputMode {
-    match mode {
-      1. => LfoOutputMode::Bipolar,
-      2. => LfoOutputMode::UnipolarPositive,
-      3. => LfoOutputMode::UnipolarNegative,
-      _ => panic!("Mode is invalid."),
-    }
-  }
-
-  fn get_parameters(&self, ports: &mut Ports) -> (f32, f32, LfoShape, f32, f32, LfoOutputMode) {
+  fn get_parameters(&self, ports: &mut Ports) -> (f32, f32, LfoShape, f32, f32) {
     (
       *ports.freq,
       *ports.depth * 0.01,
       Self::map_shape(*ports.shape),
       *ports.offset * 0.01,
       *ports.chance * 0.01,
-      Self::map_mode(*ports.mode),
     )
   }
 }
@@ -76,7 +65,7 @@ impl Plugin for DmLFO {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let (freq, depth, shape, offset, chance, mode) = self.get_parameters(ports);
+    let (freq, depth, shape, offset, chance) = self.get_parameters(ports);
 
     if !self.is_active {
       self.lfo.initialize_params(freq, depth, chance);
@@ -84,7 +73,7 @@ impl Plugin for DmLFO {
     }
 
     for output in ports.output.iter_mut() {
-      *output = self.lfo.process(freq, depth, shape, offset, chance, mode);
+      *output = self.lfo.process(freq, depth, shape, offset, chance);
     }
   }
 }

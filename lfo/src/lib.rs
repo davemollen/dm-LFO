@@ -18,13 +18,6 @@ pub enum LfoShape {
   Noise,
 }
 
-#[derive(Clone, Copy, PartialEq)]
-pub enum LfoOutputMode {
-  Bipolar,
-  UnipolarPositive,
-  UnipolarNegative,
-}
-
 pub struct Lfo {
   smooth_freq: RampSmooth,
   smooth_depth: RampSmooth,
@@ -53,13 +46,10 @@ impl Lfo {
     shape: LfoShape,
     offset: f32,
     chance: f32,
-    mode: LfoOutputMode,
   ) -> f32 {
     let freq = self.smooth_freq.process(freq);
     let depth = self.smooth_depth.process(depth);
 
-    self
-      .oscillator
-      .process(freq, shape, chance, depth, offset, mode)
+    self.oscillator.process(freq, shape, chance, depth, offset)
   }
 }
