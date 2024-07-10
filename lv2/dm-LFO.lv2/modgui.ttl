@@ -1,0 +1,38 @@
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
+
+<https://github.com/davemollen/dm-LFO>
+    modgui:gui [
+        modgui:resourcesDirectory <modgui> ;
+        modgui:iconTemplate <modgui/icon-dm-lfo.html> ;
+        modgui:stylesheet <modgui/stylesheet-dm-lfo.css> ;
+        modgui:screenshot <modgui/screenshot-dm-lfo.png> ;
+        modgui:thumbnail <modgui/thumbnail-dm-lfo.png> ;
+        modgui:brand "DM" ;
+        modgui:label "LFO" ;
+        modgui:model "boxy" ;
+        modgui:panel "1-select-4-knobs" ;
+        modgui:color "gray" ;
+        modgui:knob "silver" ;
+        modgui:port [
+            lv2:index 0 ;
+            lv2:symbol "freq" ;
+            lv2:name "Freq" ;
+        ] , [
+            lv2:index 1 ;
+            lv2:symbol "depth" ;
+            lv2:name "Depth" ;
+        ] , [
+            lv2:index 2 ;
+            lv2:symbol "shape" ;
+            lv2:name "Shape" ;
+        ] , [
+            lv2:index 3 ;
+            lv2:symbol "offset" ;
+            lv2:name "Offset" ;
+        ] , [
+            lv2:index 4 ;
+            lv2:symbol "chance" ;
+            lv2:name "Chance" ;
+        ] ;
+    ] .

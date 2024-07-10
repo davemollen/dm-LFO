@@ -5,3 +5,4 @@
     a lv2:Plugin ;
     lv2:binary <libdm_lfo.so> ;
     rdfs:seeAlso <dm-LFO.ttl>  .
+<https://github.com/davemollen/dm-LFO> rdfs:seeAlso <modgui.ttl> .
