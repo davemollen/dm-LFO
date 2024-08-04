@@ -135,12 +135,12 @@ impl Oscillator {
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {
-    self.origin * (1. - mix) + self.target * mix
+    self.origin + (self.target - self.origin) * mix
   }
 
   fn cosine_interp(&self, mix: f32) -> f32 {
     let cosine_mix = (1. - (mix * PI).fast_cos()) * 0.5;
-    self.origin * (1. - cosine_mix) + self.target * cosine_mix
+    self.origin + (self.target - self.origin) * cosine_mix
   }
 
   fn wrap(x: f32) -> f32 {
