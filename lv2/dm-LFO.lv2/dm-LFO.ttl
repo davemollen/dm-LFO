@@ -19,7 +19,7 @@
 	mod:brand "DM" ;
 	mod:label "LFO" ;
 	rdfs:comment """
-A Control Voltage LFO plugin effect written in Rust.
+A Control Voltage LFO plugin.
 """ ;
 	lv2:requiredFeature lv2:inPlaceBroken ;
 	lv2:optionalFeature lv2:hardRTCapable ;
