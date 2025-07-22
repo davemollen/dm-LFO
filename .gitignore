@@ -1,2 +1,5 @@
 target
 .DS_Store
+*libdm_lfo.so
+*libdm_lfo.dylib
+*libdm_lfo.dll
