@@ -5,12 +5,12 @@ use lv2::prelude::*;
 
 #[derive(PortCollection)]
 struct Ports {
-  freq: InputPort<Control>,
-  depth: InputPort<Control>,
-  shape: InputPort<Control>,
-  offset: InputPort<Control>,
-  chance: InputPort<Control>,
-  output: OutputPort<CV>,
+  freq: InputPort<InPlaceControl>,
+  depth: InputPort<InPlaceControl>,
+  shape: InputPort<InPlaceControl>,
+  offset: InputPort<InPlaceControl>,
+  chance: InputPort<InPlaceControl>,
+  output: OutputPort<InPlaceCV>,
 }
 
 #[uri("https://github.com/davemollen/dm-LFO")]
@@ -41,15 +41,15 @@ impl Plugin for DmLFO {
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
     self.params.set(
-      *ports.freq,
-      *ports.shape,
-      *ports.chance * 0.01,
-      *ports.depth * 0.01,
-      *ports.offset * 0.01,
+      ports.freq.get(),
+      ports.shape.get(),
+      ports.chance.get() * 0.01,
+      ports.depth.get() * 0.01,
+      ports.offset.get() * 0.01,
     );
 
-    for output in ports.output.iter_mut() {
-      *output = self.lfo.process(&mut self.params);
+    for output in ports.output.iter() {
+      output.set(self.lfo.process(&mut self.params));
     }
   }
 }

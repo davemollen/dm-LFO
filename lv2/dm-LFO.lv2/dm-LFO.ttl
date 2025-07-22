@@ -21,7 +21,6 @@
 	rdfs:comment """
 A Control Voltage LFO plugin.
 """ ;
-	lv2:requiredFeature lv2:inPlaceBroken ;
 	lv2:optionalFeature lv2:hardRTCapable ;
 	lv2:port [
 		a lv2:InputPort, lv2:ControlPort ;
