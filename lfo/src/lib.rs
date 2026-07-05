@@ -13,6 +13,8 @@ use {
   std::f32::consts::{PI, TAU},
 };
 
+const CV_MULTIPLIER: f32 = 5.;
+
 pub struct Lfo {
   phasor: Phasor,
   delta: Delta,
@@ -135,7 +137,7 @@ impl Lfo {
     } * depth
       + offset)
       .clamp(-1., 1.)
-      * 20.
+      * CV_MULTIPLIER
   }
 
   fn linear_interp(&self, mix: f32) -> f32 {
