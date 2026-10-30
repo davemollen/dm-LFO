@@ -11,6 +11,7 @@ struct Ports {
   offset: InputPort<InPlaceControl>,
   chance: InputPort<InPlaceControl>,
   output: OutputPort<InPlaceCV>,
+  enabled: InputPort<InPlaceControl>,
 }
 
 #[uri("https://github.com/davemollen/dm-LFO")]
@@ -40,6 +41,10 @@ impl Plugin for DmLFO {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
+    if ports.enabled.get() == 0. {
+      return;
+    }
+
     self.params.set(
       ports.freq.get(),
       ports.shape.get(),
