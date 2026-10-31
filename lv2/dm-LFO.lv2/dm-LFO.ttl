@@ -18,6 +18,8 @@
 	] ;
 	mod:brand "DM" ;
 	mod:label "LFO" ;
+	lv2:minorVersion 2 ;
+	lv2:microVersion 0 ;
 	rdfs:comment """
 A Control Voltage LFO plugin.
 """ ;
